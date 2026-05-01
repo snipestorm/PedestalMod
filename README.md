@@ -4,7 +4,7 @@ Welcome to the Pedestal Mod, A small mod that adds a Pedestal to display items o
 
 ## Setup
 
-Mod Built for Minecraft Fabric 1.21.11
+Version: Minecraft Fabric 1.21.11
 
 Fabirc API is required
 
