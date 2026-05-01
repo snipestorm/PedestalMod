@@ -1,0 +1,7 @@
+{
+"block.pedestalmod.pedestal" : "Pedestal",
+  "gui.pedestalmod.pedestal": "Pedestal",
+  "itemgroup.pedestal": "Pedestal Mod",
+  "advancements.pedestal.title": "Show Them All!",
+  "advancements.pedestal.description": "I can display all my valuables, for all to see!"
+}
