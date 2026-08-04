@@ -24,3 +24,5 @@ public class Pedestalmod implements ModInitializer {
 		ModItemGroups.registerItemGroups();
 	}
 }
+
+// This is Version 26.1 //
