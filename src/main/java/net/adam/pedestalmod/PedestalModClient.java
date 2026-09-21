@@ -5,8 +5,8 @@ import net.adam.pedestalmod.block.entity.renderer.PedestalBlockEntityRenderer;
 import net.adam.pedestalmod.screen.ModScreenHandlers;
 import net.adam.pedestalmod.screen.custom.PedestalScreen;
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.gui.screen.ingame.HandledScreens;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 
 public class PedestalModClient implements ClientModInitializer {
     /**
@@ -14,7 +14,7 @@ public class PedestalModClient implements ClientModInitializer {
      */
     @Override
     public void onInitializeClient() {
-        BlockEntityRendererFactories.register(ModBlockEntities.PEDESTAL_BE, PedestalBlockEntityRenderer::new);
-        HandledScreens.register(ModScreenHandlers.PEDESTAL_SCREEN_HANDLER, PedestalScreen::new);
+        BlockEntityRenderers.register(ModBlockEntities.PEDESTAL_BE, PedestalBlockEntityRenderer::new);
+        MenuScreens.register(ModScreenHandlers.PEDESTAL_MENU, PedestalScreen::new);
     }
 }

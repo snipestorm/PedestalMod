@@ -2,33 +2,27 @@ package net.adam.pedestalmod.screen.custom;
 
 
 import net.adam.pedestalmod.Pedestalmod;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
 
-public class PedestalScreen extends HandledScreen<PedestalScreenHandler> {
-    public static final Identifier GUI_TEXTURE =
-            Identifier.of(Pedestalmod.MOD_ID, "textures/gui/pedestal/pedestal_gui.png");
+public class PedestalScreen extends AbstractContainerScreen<PedestalMenu> {
+    private static final Identifier GUI_TEXTURE =
+            Identifier.fromNamespaceAndPath(Pedestalmod.MOD_ID, "textures/gui/pedestal/pedestal_gui.png");
 
-    public PedestalScreen(PedestalScreenHandler handler, PlayerInventory inventory, Text title) {
-        super(handler, inventory, title);
+    public PedestalScreen(PedestalMenu menu, Inventory inventory, Component title) {
+        super(menu, inventory, title);
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        int x = (width - imageWidth) / 2;
+        int y = (height - imageHeight) / 2;
 
-        int x = (width - backgroundWidth) / 2;
-        int y = (height - backgroundHeight) / 2;
-
-        context.drawTexture(RenderPipelines.GUI_TEXTURED,GUI_TEXTURE, x, y, 0, 0, backgroundWidth, backgroundHeight, 256 ,256);
-    }
-
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, GUI_TEXTURE, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
     }
 }

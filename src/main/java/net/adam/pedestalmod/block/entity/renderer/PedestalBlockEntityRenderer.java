@@ -1,14 +1,24 @@
 package net.adam.pedestalmod.block.entity.renderer;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.adam.pedestalmod.block.entity.custom.PedestalBlockEntity;
-
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class PedestalBlockEntityRenderer implements BlockEntityRenderer<PedestalBlockEntity, PedestalBlockEntityRenderState> {
-    private final ItemModelManager itemModelManager;
+    private final ItemModelResolver itemModelResolver;
 
-    public PedestalBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
-        itemModelManager = context.itemModelManager();
-
+    public PedestalBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
+        itemModelResolver = context.itemModelResolver();
     }
 
     @Override
@@ -17,36 +27,27 @@ public class PedestalBlockEntityRenderer implements BlockEntityRenderer<Pedestal
     }
 
     @Override
-    public void updateRenderState(PedestalBlockEntity blockEntity, PedestalBlockEntityRenderState state, float tickProgress,
-                                  Vec3d cameraPos, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
-        BlockEntityRenderer.super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+    public void extractRenderState(PedestalBlockEntity blockEntity, PedestalBlockEntityRenderState state, float partialTicks, Vec3 cameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
+        BlockEntityRenderer.super.extractRenderState(blockEntity, state, partialTicks, cameraPosition, breakProgress);
 
-        state.lightPosition = blockEntity.getPos();
-        state.blockEntityWorld = blockEntity.getWorld();
-        state.rotation = blockEntity.getRenderingRotation();
+        state.level = blockEntity.getLevel();
+        state.rotation = (blockEntity.getLevel().getGameTime() + partialTicks * 0.5f) % 360f;
 
-        itemModelManager.clearAndUpdate(state.itemRenderState,
-                blockEntity.getStack(0), ItemDisplayContext.FIXED, blockEntity.getWorld(), null, 0);
+        itemModelResolver.updateForTopItem(state.itemStackRenderState,
+                blockEntity.getTheItem(), ItemDisplayContext.FIXED, blockEntity.getLevel(), null, 0);
     }
 
     @Override
-    public void render(PedestalBlockEntityRenderState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
+    public void submit(PedestalBlockEntityRenderState state, PoseStack poseStack,
+                       SubmitNodeCollector submitNodeCollector, CameraRenderState camera) {
+        poseStack.pushPose();
 
-        matrices.push();
-        matrices.translate(0.5f, 1.15f, 0.5f);
-        matrices.scale(0.5f, 0.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(state.rotation));
+        poseStack.translate(0.5f, 1.15f, 0.5f);
+        poseStack.scale(0.5f, 0.5f, 0.5f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(state.rotation));
 
-        state.itemRenderState.render(matrices, queue, getLightLevel(state.blockEntityWorld, state.pos), OverlayTexture.DEFAULT_UV, 0);
+        state.itemStackRenderState.submit(poseStack, submitNodeCollector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 
-        matrices.pop();
-
-
+        poseStack.popPose();
     }
-    private int getLightLevel(World world, BlockPos pos) {
-        int bLight = world.getLightLevel(LightType.BLOCK, pos);
-        int sLight = world.getLightLevel(LightType.SKY, pos);
-        return LightmapTextureManager.pack(bLight, sLight);
-    }
-
 }

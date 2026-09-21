@@ -1,121 +1,103 @@
 package net.adam.pedestalmod.block.entity.custom;
 
+
 import net.adam.pedestalmod.block.entity.ModBlockEntities;
-import net.adam.pedestalmod.screen.custom.PedestalScreenHandler;
+import net.adam.pedestalmod.screen.custom.PedestalMenu;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.ticks.ContainerSingleItem;
+import org.jetbrains.annotations.Nullable;
 
+public class PedestalBlockEntity extends BlockEntity implements ContainerSingleItem.BlockContainerSingleItem, MenuProvider {
+    public NonNullList<ItemStack> inventory = NonNullList.withSize(1, ItemStack.EMPTY);
 
-
-public class PedestalBlockEntity extends BlockEntity implements Inventory, ExtendedScreenHandlerFactory<BlockPos> {
-    private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
-    private float rotation = 0;
-
-    public PedestalBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.PEDESTAL_BE, pos, state);
+    public PedestalBlockEntity(BlockPos worldPosition, BlockState blockState) {
+        super(ModBlockEntities.PEDESTAL_BE, worldPosition, blockState);
     }
 
     @Override
-    public int size() {
-        return inventory.size();
+    public BlockEntity getContainerBlockEntity() {
+        return this;
     }
 
     @Override
-    public boolean isEmpty() {
-        for(int i = 0; i < size(); i++) {
-            ItemStack stack = getStack(i);
-            if(!stack.isEmpty()) {
-                return false;
-            }
+    public ItemStack getTheItem() {
+        return inventory.getFirst();
+    }
+
+    @Override
+    public void setTheItem(ItemStack itemStack) {
+        setChanged();
+        inventory.set(0, itemStack.copyWithCount(1));
+    }
+
+    @Override
+    public void clearContent() {
+        inventory.set(0, ItemStack.EMPTY);
+    }
+
+    public void drops() {
+        Containers.dropContents(this.level, this.worldPosition, inventory);
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        ContainerHelper.saveAllItems(output, inventory);
+    }
+
+    @Override
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        ContainerHelper.loadAllItems(input, inventory);
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.pedestalmod.pedestal");
+    }
+
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+        return new PedestalMenu(containerId, inventory, this);
+    }
+
+
+
+    /* BLOCK ENTITY SYNC METHOD */
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if(!level.isClientSide()) {
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
         }
-
-        return true;
     }
 
     @Override
-    public ItemStack getStack(int slot) {
-        markDirty();
-        return inventory.get(slot);
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public ItemStack removeStack(int slot, int amount) {
-        markDirty();
-        return Inventories.removeStack(inventory, slot);
-    }
-
-    @Override
-    public ItemStack removeStack(int slot) {
-        markDirty();
-        return Inventories.removeStack(inventory, slot);
-    }
-
-    @Override
-    public void setStack(int slot, ItemStack stack) {
-        markDirty();
-        inventory.set(slot, stack.copyWithCount(1));
-    }
-
-    @Override
-    public boolean canPlayerUse(PlayerEntity player) {
-        return Inventory.canPlayerUse(this, player);
-    }
-
-    @Override
-    public void clear() {
-        inventory.clear();
-    }
-
-    @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
-        Inventories.writeData(view, inventory);
-    }
-
-    @Override
-    protected void readData(ReadView view) {
-        super.readData(view);
-        Inventories.readData(view, inventory);
-    }
-
-    public float getRenderingRotation() {
-        rotation += 0.5f;
-        if(rotation >= 360) {
-            rotation = 0;
-        }
-        return rotation;
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @Override
-    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-        return createNbt(registryLookup);
-    }
-
-    /* ADDING A SCREEN */
-
-    @Override
-    public BlockPos getScreenOpeningData(ServerPlayerEntity player) {
-        return this.pos;
-    }
-
-    @Override
-    public Text getDisplayName() {
-        return Text.translatable("gui.pedestalmod.pedestal");
-    }
-
-    @Nullable
-    @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new PedestalScreenHandler(syncId, playerInventory, this.pos);
-    }
-
-    @Override
-    public void onBlockReplaced(BlockPos pos, BlockState oldState) {
-        ItemScatterer.spawn(world, pos, (this));
-        super.onBlockReplaced(pos, oldState);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
     }
 }

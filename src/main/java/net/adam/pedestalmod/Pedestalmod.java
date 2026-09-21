@@ -2,8 +2,7 @@ package net.adam.pedestalmod;
 
 import net.adam.pedestalmod.block.ModBlocks;
 import net.adam.pedestalmod.block.entity.ModBlockEntities;
-import net.adam.pedestalmod.item.ModItemGroups;
-import net.adam.pedestalmod.item.ModItems;
+import net.adam.pedestalmod.item.ModCreativeModeTab;
 import net.adam.pedestalmod.screen.ModScreenHandlers;
 
 
@@ -18,11 +17,10 @@ public class Pedestalmod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
 		ModBlockEntities.registerBlockEntities();
 		ModScreenHandlers.registerScreenHandlers();
-		ModItemGroups.registerItemGroups();
+		ModCreativeModeTab.registerItemGroups();
 	}
 }
 
