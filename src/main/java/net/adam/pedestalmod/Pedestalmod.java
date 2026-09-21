@@ -7,6 +7,7 @@ import net.adam.pedestalmod.item.ModItems;
 import net.adam.pedestalmod.screen.ModScreenHandlers;
 
 
+import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
