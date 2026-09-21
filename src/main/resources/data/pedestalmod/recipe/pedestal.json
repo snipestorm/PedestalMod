@@ -2,16 +2,17 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "F": "minecraft:smooth_stone"
-    },
-    "pattern": [
-      "FFF",
-      " F ",
-      "FFF"
-    ],
-    "result": {
-      "count": 1,
-      "id": "pedestalmod:pedestal"
-    }
+    "F": "minecraft:smooth_stone",
+    "S": "minecraft:smooth_stone_slab"
+  },
+  "pattern": [
+    "SSS",
+    " F ",
+    "FFF"
+  ],
+  "result": {
+    "count": 1,
+    "id": "pedestalmod:pedestal"
   }
+}
 
