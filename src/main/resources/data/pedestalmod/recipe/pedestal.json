@@ -2,10 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "F": "minecraft:smooth_stone"
+    "F": "minecraft:smooth_stone",
+    "S": "minecraft:smooth_stone_slab"
     },
     "pattern": [
-      "FFF",
+      "SSS",
       " F ",
       "FFF"
     ],
